@@ -21,8 +21,8 @@ def detect_and_predict_mask(frame, faceNet, maskNet):
 	detections = faceNet.forward()
 
 	faces = []
-	locs = []
-	preds = []
+	loc = []
+	prediction = []
 
 	for i in range(0, detections.shape[2]):
 		# extract the confidence associated 
@@ -52,18 +52,18 @@ def detect_and_predict_mask(frame, faceNet, maskNet):
 			# add the face and bounding boxes to their respective
 			# lists
 			faces.append(face)
-			locs.append((startX, startY, endX, endY))
+			loc.append((startX, startY, endX, endY))
 
 	# only make a predictions if at least one face was detected
 	if len(faces) > 0:
 		# for faster inference we'll make batch predictions on *all*
 		# faces at the same time rather than one-by-one predictions
 		# in the above `for` loop
-		preds = maskNet.predict(faces)
+		prediction = maskNet.predict(faces)
 
 	# return a 2-tuple of the face locations and their corresponding
 	# locations
-	return (locs, preds)
+	return (loc, prediction)
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -101,10 +101,10 @@ while True:
 	frame = imutils.resize(frame, width=400)
 
 	# detect faces in the frame and determine if they are wearing a face mask or not
-	(locs, preds) = detect_and_predict_mask(frame, faceNet, maskNet)
+	(locs, prediction) = detect_and_predict_mask(frame, faceNet, maskNet)
 
 	# loop over the detected face locations and their corresponding locations
-	for (box, pred) in zip(locs, preds):
+	for (box, pred) in zip(loc, prediction):
 		(startX, startY, endX, endY) = box
 		(mask, withoutMask) = pred
 
